@@ -96,19 +96,19 @@ export default function Header() {
     {
       category: "PDF Creation",
       tools: [
-        { name: "Create PDF", href: "/tools/create-pdf", icon: FilePlus, description: "Create PDFs from images/text" },
-        { name: "Image to PDF", href: "/tools/image-to-pdf", icon: FileImage, description: "Convert images to PDF" },
-        { name: "Text to PDF", href: "/tools/text-to-pdf", icon: Type, description: "Convert text documents to PDF" },
-        { name: "Sign PDF", href: "/tools/sign-pdf", icon: Signature, description: "Add digital signatures" },
+        { name: "Create PDF", href: "/create-pdf", icon: FilePlus, description: "Create PDFs from images/text" },
+        { name: "Image to PDF", href: "/image-to-pdf", icon: FileImage, description: "Convert images to PDF" },
+        { name: "Text to PDF", href: "/text-to-pdf", icon: Type, description: "Convert text documents to PDF" },
+        { name: "Sign PDF", href: "/sign-pdf", icon: Signature, description: "Add digital signatures" },
       ],
     },
     {
       category: "PDF Editing",
       tools: [
-        { name: "Merge PDFs", href: "/tools/merge-pdf", icon: Merge, description: "Combine multiple PDFs" },
-        { name: "Split PDF", href: "/tools/split-pdf", icon: Split, description: "Split PDF into pages" },
-        { name: "Compress PDF", href: "/tools/compress-pdf", icon: Zap, description: "Reduce PDF file size" },
-        { name: "Delete Pages", href: "/tools/delete-pdf-pages", icon: FileX, description: "Remove unwanted pages" },
+        { name: "Merge PDFs", href: "/merge-pdf", icon: Merge, description: "Combine multiple PDFs" },
+        { name: "Split PDF", href: "/split-pdf", icon: Split, description: "Split PDF into pages" },
+        { name: "Compress PDF", href: "/compress-pdf", icon: Zap, description: "Reduce PDF file size" },
+        { name: "Delete Pages", href: "/delete-pdf-pages", icon: FileX, description: "Remove unwanted pages" },
       ],
     },
   ]
