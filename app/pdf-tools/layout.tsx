@@ -7,7 +7,6 @@ import { FileText, FilePlus, Merge, Split, Zap, FileImage, Eye, Edit, ArrowLeft,
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-import { useEffect, useRef, useState } from "react"
 
 const pdfTools = [
   {
@@ -90,31 +89,12 @@ interface PDFToolsLayoutProps {
 
 export default function PDFToolsLayout({ children }: PDFToolsLayoutProps) {
   const pathname = usePathname()
-  const headerRef = useRef<HTMLDivElement>(null)
-  const [headerHeight, setHeaderHeight] = useState(0)
-
-  useEffect(() => {
-    // Get the actual header height to calculate proper spacing
-    const updateHeaderHeight = () => {
-      const header = document.querySelector('header')
-      if (header) {
-        setHeaderHeight(header.offsetHeight)
-      }
-    }
-
-    updateHeaderHeight()
-    window.addEventListener('resize', updateHeaderHeight)
-    
-    return () => {
-      window.removeEventListener('resize', updateHeaderHeight)
-    }
-  }, [])
 
   return (
-    <div className="min-h-screen bg-background" style={{ paddingTop: `${headerHeight}px` }}>
+    <div className="min-h-screen bg-background pt-40">
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
-        <div ref={headerRef} className="flex items-center gap-4 mb-8">
+        <div className="flex items-center gap-4 mb-8">
           <Link href="/">
             <Button variant="outline" size="sm">
               <ArrowLeft className="w-4 h-4 mr-2" />
