@@ -66,6 +66,7 @@ export default function ImageResizer(): ReactElement {
     const url = URL.createObjectURL(file);
     setOriginalPreview(url);
 
+    // Get image dimensions
     const img = new Image();
     img.crossOrigin = "anonymous";
     img.onload = () => {
@@ -109,6 +110,7 @@ export default function ImageResizer(): ReactElement {
   };
 
   const handleWidthChange = (width: number) => {
+    if (width < 1) return;
     setTargetWidth(width);
     if (maintainAspectRatio && originalDimensions.width > 0 && originalDimensions.height > 0) {
       const aspectRatio = originalDimensions.height / originalDimensions.width;
@@ -117,6 +119,7 @@ export default function ImageResizer(): ReactElement {
   };
 
   const handleHeightChange = (height: number) => {
+    if (height < 1) return;
     setTargetHeight(height);
     if (maintainAspectRatio && originalDimensions.width > 0 && originalDimensions.height > 0) {
       const aspectRatio = originalDimensions.width / originalDimensions.height;
@@ -125,12 +128,7 @@ export default function ImageResizer(): ReactElement {
   };
 
   const resizeImage = async () => {
-    if (!originalFile || !canvasRef.current || !originalPreview) return;
-
-    if (targetWidth <= 0 || targetHeight <= 0) {
-      setError("Width and height must be greater than 0.");
-      return;
-    }
+    if (!originalFile || !canvasRef.current || targetWidth <= 0 || targetHeight <= 0) return;
 
     setIsResizing(true);
     setProgress(0);
@@ -144,6 +142,7 @@ export default function ImageResizer(): ReactElement {
       const img = new Image();
       img.crossOrigin = "anonymous";
       img.onload = () => {
+        // Set canvas dimensions
         canvas.width = targetWidth;
         canvas.height = targetHeight;
 
@@ -154,12 +153,16 @@ export default function ImageResizer(): ReactElement {
               clearInterval(progressInterval);
               return 95;
             }
-            return prev + 15;
+            return prev + 20;
           });
         }, 100);
 
+        // Draw resized image
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = "high";
         ctx.drawImage(img, 0, 0, targetWidth, targetHeight);
 
+        // Convert to blob
         canvas.toBlob(
           (blob) => {
             if (!blob) {
@@ -170,7 +173,6 @@ export default function ImageResizer(): ReactElement {
 
             const fileName = `resized_${originalFile.name}`;
             const file = new File([blob], fileName, { type: originalFile.type });
-
             setResizedFile(file);
             const url = URL.createObjectURL(blob);
             setResizedPreview(url);
@@ -200,7 +202,7 @@ export default function ImageResizer(): ReactElement {
 
     const a = document.createElement("a");
     a.href = resizedPreview;
-    a.download = resizedFile.name;
+    a.download = `resized_${originalFile?.name || "image"}`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -258,7 +260,7 @@ export default function ImageResizer(): ReactElement {
       <div className="flex flex-col lg:flex-row gap-6 min-h-screen">
         {/* Main Content */}
         <main className="flex-1 lg:w-3/4 space-y-6">
-          {/* Page Header - NOT Sticky */}
+          {/* Page Header (NOT Sticky) */}
           <Card className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 border-blue-500/20">
             <CardHeader className="pb-4">
               <CardTitle className="text-foreground flex items-center gap-2 text-2xl">
