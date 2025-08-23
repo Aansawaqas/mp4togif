@@ -42,7 +42,7 @@ export default function ImageCompressor(): ReactElement {
   const [error, setError] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Revoke object URLs on unmount
+  // Cleanup object URLs
   useEffect(() => {
     return () => {
       if (originalPreview) URL.revokeObjectURL(originalPreview);
@@ -111,7 +111,7 @@ export default function ImageCompressor(): ReactElement {
 
       new Compressor(originalFile, {
         quality: quality[0] / 100,
-        mimeType: "image/jpeg", // Ensures fallback format
+        mimeType: "image/jpeg",
         success: (result: File) => {
           setCompressedFile(result);
           const url = URL.createObjectURL(result);
@@ -160,7 +160,7 @@ export default function ImageCompressor(): ReactElement {
 
   return (
     <>
-      {/* Schema.org Structured Data (JSON-LD) */}
+      {/* Schema.org Structured Data */}
       <Script id="image-compressor-schema" type="application/ld+json">
         {JSON.stringify({
           "@context": "https://schema.org",
@@ -183,23 +183,21 @@ export default function ImageCompressor(): ReactElement {
             "No file size limits",
             "Privacy-focused processing",
           ],
-          mainEntityOfPage: {
-            "@type": "WebPage",
-            "@id": `${process.env.NEXT_PUBLIC_SITE_URL}/image-compressor`,
-          },
         })}
       </Script>
 
-      <div className="flex flex-col lg:flex-row gap-6 min-h-screen">
-        {/* Sidebar: Hidden on mobile, shown on large screens */}
-        <aside className="lg:w-1/4 lg:shrink-0 hidden lg:block">
-          <ImageToolsSidebar />
-        </aside>
-
-        {/* Main Content */}
+      {/* Main Layout: Sidebar on Right */}
+      <div className="flex flex-col lg:flex-row gap-6 min-h-screen pt-6 lg:pt-0">
+        {/* Main Content - Left */}
         <main className="flex-1 lg:w-3/4 space-y-6">
+          {/* Anchor target offset to prevent header overlap */}
+          <div id="top" className="h-16 md:h-20"></div>
+
           {/* Page Header */}
-          <Card className="bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border-yellow-500/20">
+          <Card
+            className="bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border-yellow-500/20 sticky top-0 z-10"
+            style={{ marginTop: "-1rem", paddingTop: "1rem" }}
+          >
             <CardHeader className="pb-4">
               <CardTitle className="text-foreground flex items-center gap-2 text-2xl">
                 <Zap className="w-6 h-6 text-yellow-400" />
@@ -215,9 +213,8 @@ export default function ImageCompressor(): ReactElement {
             </CardHeader>
           </Card>
 
-          {/* Upload & Settings Grid */}
+          {/* Upload & Settings */}
           <div className="grid lg:grid-cols-2 gap-6">
-            {/* Upload Section */}
             <Card className="bg-card/50 backdrop-blur-lg border-border">
               <CardHeader>
                 <CardTitle className="text-foreground flex items-center gap-2">
@@ -275,9 +272,6 @@ export default function ImageCompressor(): ReactElement {
                         src={originalPreview}
                         alt="Original"
                         className="w-full h-48 object-contain bg-black/5"
-                        onLoad={() => {
-                          if (originalPreview) URL.revokeObjectURL(originalPreview);
-                        }}
                       />
                       <Badge className="absolute top-2 left-2 bg-blue-500/20 text-blue-300">
                         Original
@@ -294,7 +288,6 @@ export default function ImageCompressor(): ReactElement {
               </CardContent>
             </Card>
 
-            {/* Settings & Result */}
             <Card className="bg-card/50 backdrop-blur-lg border-border">
               <CardHeader>
                 <CardTitle className="text-foreground">Compression Settings</CardTitle>
@@ -381,7 +374,7 @@ export default function ImageCompressor(): ReactElement {
             </Card>
           </div>
 
-          {/* How to Use, Features, Tips */}
+          {/* Tabs Section */}
           <Tabs defaultValue="howto" className="w-full">
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="howto">How to Use</TabsTrigger>
@@ -515,6 +508,13 @@ export default function ImageCompressor(): ReactElement {
             </TabsContent>
           </Tabs>
         </main>
+
+        {/* Sidebar - On the Right Side */}
+        <aside className="lg:w-1/4 lg:shrink-0">
+          <div className="sticky top-24">
+            <ImageToolsSidebar />
+          </div>
+        </aside>
       </div>
     </>
   );
