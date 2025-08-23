@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://mp4togif.com/sitemap.xml
