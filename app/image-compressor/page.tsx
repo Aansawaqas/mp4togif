@@ -1,129 +1,166 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type { ReactElement } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
+import {
+  Upload,
+  Download,
+  Zap,
+  Info,
+  CheckCircle,
+  AlertCircle,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Slider } from "@/components/ui/slider";
+import { Label } from "@/components/ui/label";
+import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
+import Script from "next/script";
+import ImageToolsSidebar from "@/components/image-tools-sidebar";
 
-import { useState, useRef, useCallback } from "react"
-import { Upload, Download, Zap, Info, CheckCircle, AlertCircle } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Slider } from "@/components/ui/slider"
-import { Label } from "@/components/ui/label"
-import { Progress } from "@/components/ui/progress"
-import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import Script from "next/script"
-import ImageToolsSidebar from "@/components/image-tools-sidebar"
+export default function ImageCompressor(): ReactElement {
+  const [originalFile, setOriginalFile] = useState<File | null>(null);
+  const [compressedFile, setCompressedFile] = useState<File | null>(null);
+  const [originalPreview, setOriginalPreview] = useState<string>("");
+  const [compressedPreview, setCompressedPreview] = useState<string>("");
+  const [quality, setQuality] = useState<number[]>([80]);
+  const [isCompressing, setIsCompressing] = useState<boolean>(false);
+  const [progress, setProgress] = useState<number>(0);
+  const [isDragOver, setIsDragOver] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-export default function ImageCompressor() {
-  const [originalFile, setOriginalFile] = useState<File | null>(null)
-  const [compressedFile, setCompressedFile] = useState<File | null>(null)
-  const [originalPreview, setOriginalPreview] = useState<string>("")
-  const [compressedPreview, setCompressedPreview] = useState<string>("")
-  const [quality, setQuality] = useState([80])
-  const [isCompressing, setIsCompressing] = useState(false)
-  const [progress, setProgress] = useState(0)
-  const [isDragOver, setIsDragOver] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  // Revoke object URLs on unmount
+  useEffect(() => {
+    return () => {
+      if (originalPreview) URL.revokeObjectURL(originalPreview);
+      if (compressedPreview) URL.revokeObjectURL(compressedPreview);
+    };
+  }, [originalPreview, compressedPreview]);
 
   const handleFileSelect = useCallback((file: File) => {
-    if (file && file.type.startsWith("image/")) {
-      setOriginalFile(file)
-      const url = URL.createObjectURL(file)
-      setOriginalPreview(url)
-      setCompressedFile(null)
-      setCompressedPreview("")
-      setProgress(0)
+    if (!file.type.startsWith("image/")) {
+      setError("Please upload a valid image file (JPEG, PNG, WebP).");
+      return;
     }
-  }, [])
+
+    setError(null);
+    setOriginalFile(file);
+    const url = URL.createObjectURL(file);
+    setOriginalPreview(url);
+    setCompressedFile(null);
+    setCompressedPreview("");
+    setProgress(0);
+  }, []);
 
   const handleDrop = useCallback(
     (e: React.DragEvent) => {
-      e.preventDefault()
-      setIsDragOver(false)
-      const droppedFile = e.dataTransfer.files[0]
-      handleFileSelect(droppedFile)
+      e.preventDefault();
+      setIsDragOver(false);
+      const droppedFile = e.dataTransfer.files[0];
+      handleFileSelect(droppedFile);
     },
-    [handleFileSelect],
-  )
+    [handleFileSelect]
+  );
 
   const handleDragOver = useCallback((e: React.DragEvent) => {
-    e.preventDefault()
-    setIsDragOver(true)
-  }, [])
+    e.preventDefault();
+    setIsDragOver(true);
+  }, []);
 
   const handleDragLeave = useCallback((e: React.DragEvent) => {
-    e.preventDefault()
-    setIsDragOver(false)
-  }, [])
+    e.preventDefault();
+    setIsDragOver(false);
+  }, []);
+
+  const triggerFileInput = () => {
+    fileInputRef.current?.click();
+  };
 
   const compressImage = async () => {
-    if (!originalFile) return
+    if (!originalFile) return;
 
-    setIsCompressing(true)
-    setProgress(0)
+    setIsCompressing(true);
+    setProgress(0);
+    setError(null);
 
     try {
-      // Simulate progress
       const progressInterval = setInterval(() => {
         setProgress((prev) => {
           if (prev >= 90) {
-            clearInterval(progressInterval)
-            return 90
+            clearInterval(progressInterval);
+            return 90;
           }
-          return prev + 10
-        })
-      }, 100)
+          return prev + 10;
+        });
+      }, 100);
 
-      // Use Compressor.js (would need to be loaded)
-      const { default: Compressor } = await import("compressorjs")
+      const { default: Compressor } = await import("compressorjs");
 
       new Compressor(originalFile, {
         quality: quality[0] / 100,
+        mimeType: "image/jpeg", // Ensures fallback format
         success: (result: File) => {
-          setCompressedFile(result)
-          const url = URL.createObjectURL(result)
-          setCompressedPreview(url)
-          setProgress(100)
-          setIsCompressing(false)
-          clearInterval(progressInterval)
+          setCompressedFile(result);
+          const url = URL.createObjectURL(result);
+          setCompressedPreview(url);
+          setProgress(100);
+          setIsCompressing(false);
+          clearInterval(progressInterval);
         },
         error: (err: Error) => {
-          console.error("Compression failed:", err)
-          setIsCompressing(false)
-          clearInterval(progressInterval)
+          console.error("Compression failed:", err);
+          setError(`Compression failed: ${err.message}`);
+          setIsCompressing(false);
+          clearInterval(progressInterval);
         },
-      })
-    } catch (error) {
-      console.error("Failed to load compressor:", error)
-      setIsCompressing(false)
+      });
+    } catch (err) {
+      console.error("Failed to load compressor.js", err);
+      setError("Failed to initialize image compressor. Please try again.");
+      setIsCompressing(false);
     }
-  }
+  };
 
   const downloadCompressed = () => {
-    if (compressedFile) {
-      const a = document.createElement("a")
-      a.href = compressedPreview
-      a.download = `compressed_${originalFile?.name || "image"}`
-      document.body.appendChild(a)
-      a.click()
-      document.body.removeChild(a)
-    }
-  }
+    if (!compressedFile) return;
 
-  const formatFileSize = (bytes: number) => {
-    if (bytes === 0) return "0 Bytes"
-    const k = 1024
-    const sizes = ["Bytes", "KB", "MB", "GB"]
-    const i = Math.floor(Math.log(bytes) / Math.log(k))
-    return Number.parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i]
-  }
+    const a = document.createElement("a");
+    a.href = compressedPreview;
+    a.download = `compressed_${originalFile?.name.replace(/\.[^/.]+$/, "") || "image"}.jpg`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+  };
+
+  const formatFileSize = (bytes: number): string => {
+    if (bytes === 0) return "0 Bytes";
+    const k = 1024;
+    const sizes = ["Bytes", "KB", "MB", "GB"];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
+  };
 
   const compressionRatio =
-    originalFile && compressedFile ? Math.round((1 - compressedFile.size / originalFile.size) * 100) : 0
+    originalFile && compressedFile
+      ? Math.round((1 - compressedFile.size / originalFile.size) * 100)
+      : 0;
 
   return (
     <>
-      {/* Schema Markup */}
+      {/* Schema.org Structured Data (JSON-LD) */}
       <Script id="image-compressor-schema" type="application/ld+json">
         {JSON.stringify({
           "@context": "https://schema.org",
@@ -146,24 +183,30 @@ export default function ImageCompressor() {
             "No file size limits",
             "Privacy-focused processing",
           ],
+          mainEntityOfPage: {
+            "@type": "WebPage",
+            "@id": `${process.env.NEXT_PUBLIC_SITE_URL}/image-compressor`,
+          },
         })}
       </Script>
 
-      <div className="flex flex-col lg:flex-row gap-6">
-        {/* Sidebar */}
-        <div className="lg:w-1/4">
+      <div className="flex flex-col lg:flex-row gap-6 min-h-screen">
+        {/* Sidebar: Hidden on mobile, shown on large screens */}
+        <aside className="lg:w-1/4 lg:shrink-0 hidden lg:block">
           <ImageToolsSidebar />
-        </div>
+        </aside>
 
         {/* Main Content */}
-        <div className="lg:w-3/4 space-y-6">
-          {/* Header - Fixed to not cover title */}
+        <main className="flex-1 lg:w-3/4 space-y-6">
+          {/* Page Header */}
           <Card className="bg-gradient-to-r from-yellow-500/10 to-orange-500/10 border-yellow-500/20">
             <CardHeader className="pb-4">
               <CardTitle className="text-foreground flex items-center gap-2 text-2xl">
                 <Zap className="w-6 h-6 text-yellow-400" />
                 Image Compressor
-                <Badge className="bg-yellow-400/20 text-yellow-600 dark:text-yellow-400">Most Popular</Badge>
+                <Badge className="bg-yellow-400/20 text-yellow-600 dark:text-yellow-400">
+                  Most Popular
+                </Badge>
               </CardTitle>
               <p className="text-muted-foreground mt-2">
                 Reduce image file size by up to 90% without losing visual quality. Perfect for web optimization and
@@ -172,6 +215,7 @@ export default function ImageCompressor() {
             </CardHeader>
           </Card>
 
+          {/* Upload & Settings Grid */}
           <div className="grid lg:grid-cols-2 gap-6">
             {/* Upload Section */}
             <Card className="bg-card/50 backdrop-blur-lg border-border">
@@ -182,20 +226,35 @@ export default function ImageCompressor() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
+                {error && (
+                  <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 text-red-400 text-sm rounded-lg">
+                    {error}
+                  </div>
+                )}
                 {!originalFile ? (
                   <div
-                    className={`border-2 border-dashed rounded-lg p-8 text-center transition-all cursor-pointer ${
-                      isDragOver ? "border-yellow-400 bg-yellow-400/10" : "border-border hover:border-yellow-400/50"
-                    }`}
+                    role="button"
+                    tabIndex={0}
+                    onKeyPress={(e) => {
+                      if (e.key === "Enter" || e.key === " ") triggerFileInput();
+                    }}
+                    onClick={triggerFileInput}
                     onDrop={handleDrop}
                     onDragOver={handleDragOver}
                     onDragLeave={handleDragLeave}
-                    onClick={() => fileInputRef.current?.click()}
+                    className={`border-2 border-dashed rounded-lg p-8 text-center transition-all cursor-pointer focus:outline-none focus:ring-2 focus:ring-yellow-400/50 ${
+                      isDragOver
+                        ? "border-yellow-400 bg-yellow-400/10"
+                        : "border-border hover:border-yellow-400/50"
+                    }`}
                   >
                     <Upload className="w-12 h-12 text-muted-foreground/80 mx-auto mb-4" />
                     <p className="text-foreground text-lg mb-2">Drop your image here</p>
                     <p className="text-muted-foreground/80 mb-4">Supports JPEG, PNG, WebP</p>
-                    <Button variant="outline" className="bg-white/10 border-white/30 text-foreground hover:bg-white/20">
+                    <Button
+                      variant="outline"
+                      className="bg-white/10 border-white/30 text-foreground hover:bg-white/20"
+                    >
                       Choose File
                     </Button>
                     <input
@@ -203,22 +262,32 @@ export default function ImageCompressor() {
                       type="file"
                       accept="image/*"
                       className="hidden"
-                      onChange={(e) => e.target.files?.[0] && handleFileSelect(e.target.files[0])}
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleFileSelect(file);
+                      }}
                     />
                   </div>
                 ) : (
                   <div className="space-y-4">
                     <div className="relative rounded-lg overflow-hidden">
                       <img
-                        src={originalPreview || "/placeholder.svg"}
+                        src={originalPreview}
                         alt="Original"
                         className="w-full h-48 object-contain bg-black/5"
+                        onLoad={() => {
+                          if (originalPreview) URL.revokeObjectURL(originalPreview);
+                        }}
                       />
-                      <Badge className="absolute top-2 left-2 bg-blue-500/20 text-blue-300">Original</Badge>
+                      <Badge className="absolute top-2 left-2 bg-blue-500/20 text-blue-300">
+                        Original
+                      </Badge>
                     </div>
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-muted-foreground">Size:</span>
-                      <span className="text-foreground font-medium">{formatFileSize(originalFile.size)}</span>
+                      <span className="text-foreground font-medium">
+                        {formatFileSize(originalFile.size)}
+                      </span>
                     </div>
                   </div>
                 )}
@@ -234,8 +303,11 @@ export default function ImageCompressor() {
                 {originalFile && (
                   <>
                     <div className="space-y-2">
-                      <Label className="text-foreground">Quality: {quality[0]}%</Label>
+                      <Label htmlFor="quality-slider" className="text-foreground">
+                        Quality: {quality[0]}%
+                      </Label>
                       <Slider
+                        id="quality-slider"
                         value={quality}
                         onValueChange={setQuality}
                         max={100}
@@ -243,7 +315,9 @@ export default function ImageCompressor() {
                         step={5}
                         className="[&>span:first-child]:bg-white/30 [&_[role=slider]]:bg-yellow-500"
                       />
-                      <p className="text-xs text-muted-foreground">Higher quality = larger file size</p>
+                      <p className="text-xs text-muted-foreground">
+                        Higher quality = larger file size
+                      </p>
                     </div>
 
                     <Button
@@ -270,17 +344,21 @@ export default function ImageCompressor() {
                       <div className="space-y-4">
                         <div className="relative rounded-lg overflow-hidden">
                           <img
-                            src={compressedPreview || "/placeholder.svg"}
+                            src={compressedPreview}
                             alt="Compressed"
                             className="w-full h-48 object-contain bg-black/5"
                           />
-                          <Badge className="absolute top-2 left-2 bg-green-500/20 text-green-300">Compressed</Badge>
+                          <Badge className="absolute top-2 left-2 bg-green-500/20 text-green-300">
+                            Compressed
+                          </Badge>
                         </div>
 
                         <div className="grid grid-cols-2 gap-4 text-sm">
                           <div className="flex justify-between">
                             <span className="text-muted-foreground">New Size:</span>
-                            <span className="text-foreground font-medium">{formatFileSize(compressedFile.size)}</span>
+                            <span className="text-foreground font-medium">
+                              {formatFileSize(compressedFile.size)}
+                            </span>
                           </div>
                           <div className="flex justify-between">
                             <span className="text-muted-foreground">Saved:</span>
@@ -303,7 +381,7 @@ export default function ImageCompressor() {
             </Card>
           </div>
 
-          {/* How to Use & Features */}
+          {/* How to Use, Features, Tips */}
           <Tabs defaultValue="howto" className="w-full">
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="howto">How to Use</TabsTrigger>
@@ -320,40 +398,41 @@ export default function ImageCompressor() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="grid gap-4">
-                    {[
-                      {
-                        step: 1,
-                        title: "Upload Your Image",
-                        description: "Drag and drop or click to select your image file (JPEG, PNG, WebP supported)",
-                      },
-                      {
-                        step: 2,
-                        title: "Adjust Quality",
-                        description: "Use the quality slider to balance file size and image quality (80% recommended)",
-                      },
-                      {
-                        step: 3,
-                        title: "Compress",
-                        description: "Click the compress button and wait for processing to complete",
-                      },
-                      {
-                        step: 4,
-                        title: "Download",
-                        description: "Download your compressed image with significantly reduced file size",
-                      },
-                    ].map((item) => (
-                      <div key={item.step} className="flex gap-4">
-                        <div className="w-8 h-8 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
-                          {item.step}
-                        </div>
-                        <div>
-                          <h3 className="font-semibold text-foreground">{item.title}</h3>
-                          <p className="text-muted-foreground text-sm">{item.description}</p>
-                        </div>
+                  {[
+                    {
+                      step: 1,
+                      title: "Upload Your Image",
+                      description:
+                        "Drag and drop or click to select your image file (JPEG, PNG, WebP supported)",
+                    },
+                    {
+                      step: 2,
+                      title: "Adjust Quality",
+                      description:
+                        "Use the quality slider to balance file size and image quality (80% recommended)",
+                    },
+                    {
+                      step: 3,
+                      title: "Compress",
+                      description: "Click the compress button and wait for processing to complete",
+                    },
+                    {
+                      step: 4,
+                      title: "Download",
+                      description:
+                        "Download your compressed image with significantly reduced file size",
+                    },
+                  ].map((item) => (
+                    <div key={item.step} className="flex gap-4">
+                      <div className="w-8 h-8 bg-gradient-to-r from-yellow-500 to-orange-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                        {item.step}
                       </div>
-                    ))}
-                  </div>
+                      <div>
+                        <h3 className="font-semibold text-foreground">{item.title}</h3>
+                        <p className="text-muted-foreground text-sm">{item.description}</p>
+                      </div>
+                    </div>
+                  ))}
                 </CardContent>
               </Card>
             </TabsContent>
@@ -369,22 +448,26 @@ export default function ImageCompressor() {
                       {
                         icon: CheckCircle,
                         title: "Lossless Compression",
-                        description: "Advanced algorithms preserve image quality while reducing file size",
+                        description:
+                          "Advanced algorithms preserve image quality while reducing file size",
                       },
                       {
                         icon: Zap,
                         title: "Lightning Fast",
-                        description: "Process images instantly in your browser with no server uploads",
+                        description:
+                          "Process images instantly in your browser with no server uploads",
                       },
                       {
                         icon: AlertCircle,
                         title: "Privacy First",
-                        description: "All processing happens locally - your images never leave your device",
+                        description:
+                          "All processing happens locally - your images never leave your device",
                       },
                       {
                         icon: CheckCircle,
                         title: "Multiple Formats",
-                        description: "Support for JPEG, PNG, WebP and other popular image formats",
+                        description:
+                          "Support for JPEG, PNG, WebP and other popular image formats",
                       },
                     ].map((feature, index) => (
                       <div key={index} className="flex gap-3">
@@ -431,8 +514,8 @@ export default function ImageCompressor() {
               </Card>
             </TabsContent>
           </Tabs>
-        </div>
+        </main>
       </div>
     </>
-  )
+  );
 }
