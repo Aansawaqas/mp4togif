@@ -257,10 +257,13 @@ export default function ImageResizer(): ReactElement {
       <canvas ref={canvasRef} className="hidden" />
 
       {/* Main Layout: Sidebar on Right */}
-      <div className="flex flex-col lg:flex-row gap-6 min-h-screen">
-        {/* Main Content */}
+      <div className="flex flex-col lg:flex-row gap-6 min-h-screen pt-6 lg:pt-0">
+        {/* Main Content - Left */}
         <main className="flex-1 lg:w-3/4 space-y-6">
-          {/* Page Header (NOT Sticky) */}
+          {/* Offset to prevent header overlap */}
+          <div id="top" className="h-16"></div>
+
+          {/* Page Header (Non-Sticky) */}
           <Card className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 border-blue-500/20">
             <CardHeader className="pb-4">
               <CardTitle className="text-foreground flex items-center gap-2 text-2xl">
