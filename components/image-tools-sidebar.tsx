@@ -16,7 +16,7 @@ const imageTools = [
     color: "text-yellow-400",
     bgColor: "bg-yellow-400/10",
     popular: true,
-    ready: true,
+    ready: true, // Already ready
   },
   {
     name: "Image Resizer",
@@ -26,7 +26,7 @@ const imageTools = [
     color: "text-blue-400",
     bgColor: "bg-blue-400/10",
     popular: true,
-    ready: true,
+    ready: true, // Already ready
   },
   {
     name: "Image Converter",
@@ -36,7 +36,7 @@ const imageTools = [
     color: "text-green-400",
     bgColor: "bg-green-400/10",
     popular: false,
-    ready: false,
+    ready: true, // Now available
   },
   {
     name: "Image Cropper",
@@ -46,7 +46,7 @@ const imageTools = [
     color: "text-purple-400",
     bgColor: "bg-purple-400/10",
     popular: false,
-    ready: false,
+    ready: true, // Now available
   },
   {
     name: "Image Rotator",
@@ -56,7 +56,7 @@ const imageTools = [
     color: "text-pink-400",
     bgColor: "bg-pink-400/10",
     popular: false,
-    ready: false,
+    ready: true, // Now available
   },
   {
     name: "Image Watermarker",
@@ -66,7 +66,7 @@ const imageTools = [
     color: "text-cyan-400",
     bgColor: "bg-cyan-400/10",
     popular: false,
-    ready: false,
+    ready: true, // Now available
   },
   {
     name: "Background Remover",
@@ -76,7 +76,7 @@ const imageTools = [
     color: "text-indigo-400",
     bgColor: "bg-indigo-400/10",
     popular: false,
-    ready: false,
+    ready: true, // Now available
   },
   {
     name: "Color Palette",
@@ -86,7 +86,7 @@ const imageTools = [
     color: "text-orange-400",
     bgColor: "bg-orange-400/10",
     popular: false,
-    ready: false,
+    ready: true, // Now available
   },
 ]
 
@@ -168,22 +168,26 @@ export default function ImageToolsSidebar() {
             <div className="w-2 h-2 bg-orange-400 rounded-full"></div>
             Coming Soon
           </h3>
-          <div className="space-y-2">
-            {imageTools
-              .filter((tool) => !tool.ready)
-              .slice(0, 3)
-              .map((tool) => (
-                <div key={tool.href} className="flex items-center gap-3 p-3 rounded-lg opacity-60 cursor-not-allowed">
-                  <div className={`w-8 h-8 ${tool.bgColor} rounded-lg flex items-center justify-center`}>
-                    <tool.icon className={`w-4 h-4 ${tool.color}`} />
+          {imageTools.filter((tool) => !tool.ready).length > 0 ? (
+            <div className="space-y-2">
+              {imageTools
+                .filter((tool) => !tool.ready)
+                .slice(0, 3)
+                .map((tool) => (
+                  <div key={tool.href} className="flex items-center gap-3 p-3 rounded-lg opacity-60 cursor-not-allowed">
+                    <div className={`w-8 h-8 ${tool.bgColor} rounded-lg flex items-center justify-center`}>
+                      <tool.icon className={`w-4 h-4 ${tool.color}`} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <span className="font-medium text-sm text-foreground">{tool.name}</span>
+                      <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{tool.description}</p>
+                    </div>
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <span className="font-medium text-sm text-foreground">{tool.name}</span>
-                    <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{tool.description}</p>
-                  </div>
-                </div>
-              ))}
-          </div>
+                ))}
+            </div>
+          ) : (
+            <p className="text-xs text-muted-foreground italic">All tools are now available!</p>
+          )}
         </div>
 
         {/* Quick Stats */}
