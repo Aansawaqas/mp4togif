@@ -105,9 +105,9 @@ export default function Header() {
     {
       category: "PDF Editing",
       tools: [
-        { name: "Merge PDFs", href: "/merge-pdf", icon: Merge, description: "Combine multiple PDFs" },
-        { name: "Split PDF", href: "/split-pdf", icon: Split, description: "Split PDF into pages" },
-        { name: "Compress PDF", href: "/compress-pdf", icon: Zap, description: "Reduce PDF file size" },
+        { name: "Merge PDFs", href: "/pdf-merger", icon: Merge, description: "Combine multiple PDFs" },
+        { name: "Split PDF", href: "/pdf-splitter", icon: Split, description: "Split PDF into pages" },
+        { name: "Compress PDF", href: "/pdf-compressor", icon: Zap, description: "Reduce PDF file size" },
         { name: "Delete Pages", href: "/delete-pdf-pages", icon: FileX, description: "Remove unwanted pages" },
       ],
     },
