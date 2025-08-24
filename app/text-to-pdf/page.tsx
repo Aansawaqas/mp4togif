@@ -186,7 +186,7 @@ export default function PDFGenerator() {
             <CardHeader>
               <CardTitle className="text-foreground flex items-center gap-2 text-2xl">
                 <FilePlus className="w-6 h-6 text-green-400" />
-                PDF Generator
+                Text to PDF
                 <Badge className="bg-green-400/20 text-green-600 dark:text-green-400">Most Popular</Badge>
               </CardTitle>
               <p className="text-muted-foreground mt-2">
