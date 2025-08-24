@@ -15,6 +15,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Slider } from "@/components/ui/slider"
 import { Textarea } from "@/components/ui/textarea"
 import Script from "next/script"
+import ImageToolsSidebar from "@/components/image-tools-sidebar" // Assuming this component exists
 
 const positions = [
   { label: "Top Left", value: "top-left" },
@@ -279,398 +280,412 @@ export default function ImageWatermarker() {
 
       <canvas ref={canvasRef} className="hidden" />
 
-      <div className="space-y-6">
-        {/* Header */}
-        <Card className="bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border-cyan-500/20">
-          <CardHeader>
-            <CardTitle className="text-foreground flex items-center gap-2">
-              <Droplets className="w-6 h-6 text-cyan-400" />
-              Image Watermarker
-              <Badge className="bg-cyan-400/20 text-cyan-600 dark:text-cyan-400">New</Badge>
-            </CardTitle>
-            <p className="text-muted-foreground">
-              Add watermarks to protect your images with text or logo overlays and custom positioning.
-            </p>
-          </CardHeader>
-        </Card>
+      {/* Main Layout: Sidebar on Right */}
+      <div className="flex flex-col lg:flex-row gap-6 min-h-screen pt-6 lg:pt-0">
+        {/* Main Content - Left */}
+        <main className="flex-1 lg:w-3/4 space-y-6">
+          {/* Offset to prevent header overlap */}
+          <div id="top" className="h-16"></div>
 
-        <div className="grid lg:grid-cols-2 gap-6">
-          {/* Upload Section */}
-          <Card className="bg-card/50 backdrop-blur-lg border-border">
+          {/* Header - Non-Sticky */}
+          <Card className="bg-gradient-to-r from-cyan-500/10 to-blue-500/10 border-cyan-500/20">
             <CardHeader>
-              <CardTitle className="text-foreground flex items-center gap-2">
-                <Upload className="w-5 h-5 text-cyan-400" />
-                Upload Image
+              <CardTitle className="text-foreground flex items-center gap-2 text-2xl">
+                <Droplets className="w-6 h-6 text-cyan-400" />
+                Image Watermarker
+                <Badge className="bg-cyan-400/20 text-cyan-600 dark:text-cyan-400">New</Badge>
               </CardTitle>
+              <p className="text-muted-foreground mt-2">
+                Add watermarks to protect your images with text or logo overlays and custom positioning.
+              </p>
             </CardHeader>
-            <CardContent>
-              {!originalFile ? (
-                <div
-                  className={`border-2 border-dashed rounded-lg p-8 text-center transition-all cursor-pointer ${
-                    isDragOver ? "border-cyan-400 bg-cyan-400/10" : "border-border hover:border-cyan-400/50"
-                  }`}
-                  onDrop={handleDrop}
-                  onDragOver={handleDragOver}
-                  onDragLeave={handleDragLeave}
-                  onClick={() => fileInputRef.current?.click()}
-                >
-                  <Upload className="w-12 h-12 text-muted-foreground/80 mx-auto mb-4" />
-                  <p className="text-foreground text-lg mb-2">Drop your image here</p>
-                  <p className="text-muted-foreground/80 mb-4">Supports JPEG, PNG, WebP</p>
-                  <Button variant="outline" className="bg-white/10 border-white/30 text-foreground hover:bg-white/20">
-                    Choose File
-                  </Button>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => e.target.files?.[0] && handleFileSelect(e.target.files[0])}
-                  />
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  <div className="relative rounded-lg overflow-hidden">
-                    <img
-                      src={originalPreview || "/placeholder.svg"}
-                      alt="Original"
-                      className="w-full h-48 object-contain bg-black/5"
-                    />
-                    <Badge className="absolute top-2 left-2 bg-cyan-500/20 text-cyan-300">Original</Badge>
-                  </div>
-                  <div className="grid grid-cols-2 gap-4 text-sm">
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Size:</span>
-                      <span className="text-foreground font-medium">{formatFileSize(originalFile.size)}</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-muted-foreground">Format:</span>
-                      <span className="text-foreground font-medium">
-                        {originalFile.type.split("/")[1].toUpperCase()}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </CardContent>
           </Card>
 
-          {/* Settings & Result */}
-          <Card className="bg-card/50 backdrop-blur-lg border-border">
-            <CardHeader>
-              <CardTitle className="text-foreground">Watermark Settings</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              {originalFile && (
-                <>
-                  {/* Watermark Type */}
-                  <Tabs value={watermarkType} onValueChange={(value) => setWatermarkType(value as "text" | "image")}>
-                    <TabsList className="grid w-full grid-cols-2">
-                      <TabsTrigger value="text" className="flex items-center gap-2">
-                        <Type className="w-4 h-4" />
-                        Text
-                      </TabsTrigger>
-                      <TabsTrigger value="image" className="flex items-center gap-2">
-                        <ImageIcon className="w-4 h-4" />
-                        Image
-                      </TabsTrigger>
-                    </TabsList>
-
-                    <TabsContent value="text" className="space-y-4 mt-4">
-                      <div className="space-y-2">
-                        <Label className="text-foreground">Watermark Text</Label>
-                        <Textarea
-                          value={watermarkText}
-                          onChange={(e) => setWatermarkText(e.target.value)}
-                          placeholder="Enter your watermark text..."
-                          rows={2}
-                          className="bg-card/50 border-border text-foreground resize-none"
-                        />
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                          <Label className="text-foreground">Font Size: {fontSize[0]}px</Label>
-                          <Slider
-                            value={fontSize}
-                            onValueChange={setFontSize}
-                            max={72}
-                            min={12}
-                            step={2}
-                            className="[&>span:first-child]:bg-white/30 [&_[role=slider]]:bg-cyan-500"
-                          />
-                        </div>
-                        <div className="space-y-2">
-                          <Label className="text-foreground">Text Color</Label>
-                          <div className="flex gap-2">
-                            <Input
-                              type="color"
-                              value={textColor}
-                              onChange={(e) => setTextColor(e.target.value)}
-                              className="w-12 h-10 p-1 bg-card/50 border-border"
-                            />
-                            <Input
-                              type="text"
-                              value={textColor}
-                              onChange={(e) => setTextColor(e.target.value)}
-                              className="flex-1 bg-card/50 border-border text-foreground"
-                            />
-                          </div>
-                        </div>
-                      </div>
-                    </TabsContent>
-
-                    <TabsContent value="image" className="space-y-4 mt-4">
-                      <div className="space-y-2">
-                        <Label className="text-foreground">Watermark Image</Label>
-                        <div
-                          className="border-2 border-dashed border-border rounded-lg p-4 text-center cursor-pointer hover:border-cyan-400/50 transition-colors"
-                          onClick={() => watermarkInputRef.current?.click()}
-                        >
-                          {!watermarkFile ? (
-                            <>
-                              <ImageIcon className="w-8 h-8 text-muted-foreground/80 mx-auto mb-2" />
-                              <p className="text-sm text-muted-foreground">Click to select watermark image</p>
-                            </>
-                          ) : (
-                            <div className="space-y-2">
-                              <img
-                                src={watermarkPreview || "/placeholder.svg"}
-                                alt="Watermark"
-                                className="w-16 h-16 object-contain mx-auto"
-                              />
-                              <p className="text-sm text-foreground">{watermarkFile.name}</p>
-                            </div>
-                          )}
-                        </div>
-                        <input
-                          ref={watermarkInputRef}
-                          type="file"
-                          accept="image/*"
-                          className="hidden"
-                          onChange={(e) => e.target.files?.[0] && handleWatermarkSelect(e.target.files[0])}
-                        />
-                      </div>
-                    </TabsContent>
-                  </Tabs>
-
-                  {/* Common Settings */}
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label className="text-foreground">Position</Label>
-                      <Select value={position} onValueChange={setPosition}>
-                        <SelectTrigger className="bg-card/50 border-border text-foreground">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {positions.map((pos) => (
-                            <SelectItem key={pos.value} value={pos.value}>
-                              {pos.label}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label className="text-foreground">Opacity: {opacity[0]}%</Label>
-                      <Slider
-                        value={opacity}
-                        onValueChange={setOpacity}
-                        max={100}
-                        min={10}
-                        step={5}
-                        className="[&>span:first-child]:bg-white/30 [&_[role=slider]]:bg-cyan-500"
-                      />
-                    </div>
-                  </div>
-
-                  <Button
-                    onClick={applyWatermark}
-                    disabled={isProcessing || !canApplyWatermark}
-                    className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-bold"
-                  >
-                    {isProcessing ? (
-                      <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
-                        Adding Watermark...
-                      </>
-                    ) : (
-                      <>
-                        <Droplets className="w-4 h-4 mr-2" />
-                        Apply Watermark
-                      </>
-                    )}
-                  </Button>
-
-                  {isProcessing && <Progress value={progress} className="h-2" />}
-
-                  {watermarkedFile && (
-                    <div className="space-y-4">
-                      <div className="relative rounded-lg overflow-hidden">
-                        <img
-                          src={watermarkedPreview || "/placeholder.svg"}
-                          alt="Watermarked"
-                          className="w-full h-48 object-contain bg-black/5"
-                        />
-                        <Badge className="absolute top-2 left-2 bg-green-500/20 text-green-300">Watermarked</Badge>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-4 text-sm">
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">New Size:</span>
-                          <span className="text-foreground font-medium">{formatFileSize(watermarkedFile.size)}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-muted-foreground">Watermark:</span>
-                          <span className="text-foreground font-medium">
-                            {watermarkType === "text" ? "Text" : "Image"}
-                          </span>
-                        </div>
-                      </div>
-
-                      <Button
-                        onClick={downloadWatermarked}
-                        className="w-full bg-green-500 hover:bg-green-600 text-white"
-                      >
-                        <Download className="w-4 h-4 mr-2" />
-                        Download Watermarked
-                      </Button>
-                    </div>
-                  )}
-                </>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* How to Use & Features */}
-        <Tabs defaultValue="howto" className="w-full">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="howto">How to Use</TabsTrigger>
-            <TabsTrigger value="features">Features</TabsTrigger>
-            <TabsTrigger value="tips">Pro Tips</TabsTrigger>
-          </TabsList>
-
-          <TabsContent value="howto" className="mt-6">
+          <div className="grid lg:grid-cols-2 gap-6">
+            {/* Upload Section */}
             <Card className="bg-card/50 backdrop-blur-lg border-border">
               <CardHeader>
                 <CardTitle className="text-foreground flex items-center gap-2">
-                  <Info className="w-5 h-5 text-cyan-400" />
-                  How to Add Watermarks
+                  <Upload className="w-5 h-5 text-cyan-400" />
+                  Upload Image
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="grid gap-4">
-                  {[
-                    {
-                      step: 1,
-                      title: "Upload Your Image",
-                      description: "Drag and drop or click to select the image you want to watermark",
-                    },
-                    {
-                      step: 2,
-                      title: "Choose Watermark Type",
-                      description: "Select between text watermark or upload an image/logo watermark",
-                    },
-                    {
-                      step: 3,
-                      title: "Customize Settings",
-                      description: "Adjust position, opacity, size, and other watermark properties",
-                    },
-                    {
-                      step: 4,
-                      title: "Apply & Download",
-                      description: "Process your watermark and download the protected image",
-                    },
-                  ].map((item) => (
-                    <div key={item.step} className="flex gap-4">
-                      <div className="w-8 h-8 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
-                        {item.step}
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-foreground">{item.title}</h3>
-                        <p className="text-muted-foreground text-sm">{item.description}</p>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          <TabsContent value="features" className="mt-6">
-            <Card className="bg-card/50 backdrop-blur-lg border-border">
-              <CardHeader>
-                <CardTitle className="text-foreground">Key Features</CardTitle>
-              </CardHeader>
               <CardContent>
-                <div className="grid md:grid-cols-2 gap-4">
-                  {[
-                    {
-                      icon: CheckCircle,
-                      title: "Text & Image Watermarks",
-                      description: "Add custom text or upload logo/image watermarks",
-                    },
-                    {
-                      icon: CheckCircle,
-                      title: "9-Point Positioning",
-                      description: "Place watermarks in any of 9 preset positions",
-                    },
-                    {
-                      icon: CheckCircle,
-                      title: "Opacity Control",
-                      description: "Adjust transparency from 10% to 100%",
-                    },
-                    {
-                      icon: CheckCircle,
-                      title: "Font Customization",
-                      description: "Control text size, color, and styling options",
-                    },
-                  ].map((feature, index) => (
-                    <div key={index} className="flex gap-3">
-                      {feature.icon && <feature.icon className="w-5 h-5 text-green-400 mt-1" />}
-                      <div>
-                        <h3 className="font-semibold text-foreground">{feature.title}</h3>
-                        <p className="text-muted-foreground text-sm">{feature.description}</p>
+                {!originalFile ? (
+                  <div
+                    className={`border-2 border-dashed rounded-lg p-8 text-center transition-all cursor-pointer ${
+                      isDragOver ? "border-cyan-400 bg-cyan-400/10" : "border-border hover:border-cyan-400/50"
+                    }`}
+                    onDrop={handleDrop}
+                    onDragOver={handleDragOver}
+                    onDragLeave={handleDragLeave}
+                    onClick={() => fileInputRef.current?.click()}
+                  >
+                    <Upload className="w-12 h-12 text-muted-foreground/80 mx-auto mb-4" />
+                    <p className="text-foreground text-lg mb-2">Drop your image here</p>
+                    <p className="text-muted-foreground/80 mb-4">Supports JPEG, PNG, WebP</p>
+                    <Button variant="outline" className="bg-white/10 border-white/30 text-foreground hover:bg-white/20">
+                      Choose File
+                    </Button>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => e.target.files?.[0] && handleFileSelect(e.target.files[0])}
+                    />
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    <div className="relative rounded-lg overflow-hidden">
+                      <img
+                        src={originalPreview || "/placeholder.svg"}
+                        alt="Original"
+                        className="w-full h-48 object-contain bg-black/5"
+                      />
+                      <Badge className="absolute top-2 left-2 bg-cyan-500/20 text-cyan-300">Original</Badge>
+                    </div>
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Size:</span>
+                        <span className="text-foreground font-medium">{formatFileSize(originalFile.size)}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-muted-foreground">Format:</span>
+                        <span className="text-foreground font-medium">
+                          {originalFile.type.split("/")[1].toUpperCase()}
+                        </span>
                       </div>
                     </div>
-                  ))}
-                </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
-          </TabsContent>
 
-          <TabsContent value="tips" className="mt-6">
+            {/* Settings & Result */}
             <Card className="bg-card/50 backdrop-blur-lg border-border">
               <CardHeader>
-                <CardTitle className="text-foreground">Pro Tips</CardTitle>
+                <CardTitle className="text-foreground">Watermark Settings</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-3">
-                  <div className="p-3 bg-cyan-500/10 border border-cyan-500/20 rounded-lg">
-                    <h4 className="font-semibold text-foreground mb-1">Subtle Protection</h4>
-                    <p className="text-sm text-muted-foreground">
-                      Use 30-50% opacity for watermarks that protect without being too distracting.
-                    </p>
-                  </div>
-                  <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
-                    <h4 className="font-semibold text-foreground mb-1">Logo Watermarks</h4>
-                    <p className="text-sm text-muted-foreground">
-                      Use PNG logos with transparent backgrounds for the best watermark results.
-                    </p>
-                  </div>
-                  <div className="p-3 bg-teal-500/10 border border-teal-500/20 rounded-lg">
-                    <h4 className="font-semibold text-foreground mb-1">Text Contrast</h4>
-                    <p className="text-sm text-muted-foreground">
-                      Use white text on dark images and dark text on light images for better visibility.
-                    </p>
-                  </div>
-                </div>
+              <CardContent className="space-y-6">
+                {originalFile && (
+                  <>
+                    {/* Watermark Type */}
+                    <Tabs value={watermarkType} onValueChange={(value) => setWatermarkType(value as "text" | "image")}>
+                      <TabsList className="grid w-full grid-cols-2">
+                        <TabsTrigger value="text" className="flex items-center gap-2">
+                          <Type className="w-4 h-4" />
+                          Text
+                        </TabsTrigger>
+                        <TabsTrigger value="image" className="flex items-center gap-2">
+                          <ImageIcon className="w-4 h-4" />
+                          Image
+                        </TabsTrigger>
+                      </TabsList>
+
+                      <TabsContent value="text" className="space-y-4 mt-4">
+                        <div className="space-y-2">
+                          <Label className="text-foreground">Watermark Text</Label>
+                          <Textarea
+                            value={watermarkText}
+                            onChange={(e) => setWatermarkText(e.target.value)}
+                            placeholder="Enter your watermark text..."
+                            rows={2}
+                            className="bg-card/50 border-border text-foreground resize-none"
+                          />
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="space-y-2">
+                            <Label className="text-foreground">Font Size: {fontSize[0]}px</Label>
+                            <Slider
+                              value={fontSize}
+                              onValueChange={setFontSize}
+                              max={72}
+                              min={12}
+                              step={2}
+                              className="[&>span:first-child]:bg-white/30 [&_[role=slider]]:bg-cyan-500"
+                            />
+                          </div>
+                          <div className="space-y-2">
+                            <Label className="text-foreground">Text Color</Label>
+                            <div className="flex gap-2">
+                              <Input
+                                type="color"
+                                value={textColor}
+                                onChange={(e) => setTextColor(e.target.value)}
+                                className="w-12 h-10 p-1 bg-card/50 border-border"
+                              />
+                              <Input
+                                type="text"
+                                value={textColor}
+                                onChange={(e) => setTextColor(e.target.value)}
+                                className="flex-1 bg-card/50 border-border text-foreground"
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </TabsContent>
+
+                      <TabsContent value="image" className="space-y-4 mt-4">
+                        <div className="space-y-2">
+                          <Label className="text-foreground">Watermark Image</Label>
+                          <div
+                            className="border-2 border-dashed border-border rounded-lg p-4 text-center cursor-pointer hover:border-cyan-400/50 transition-colors"
+                            onClick={() => watermarkInputRef.current?.click()}
+                          >
+                            {!watermarkFile ? (
+                              <>
+                                <ImageIcon className="w-8 h-8 text-muted-foreground/80 mx-auto mb-2" />
+                                <p className="text-sm text-muted-foreground">Click to select watermark image</p>
+                              </>
+                            ) : (
+                              <div className="space-y-2">
+                                <img
+                                  src={watermarkPreview || "/placeholder.svg"}
+                                  alt="Watermark"
+                                  className="w-16 h-16 object-contain mx-auto"
+                                />
+                                <p className="text-sm text-foreground">{watermarkFile.name}</p>
+                              </div>
+                            )}
+                          </div>
+                          <input
+                            ref={watermarkInputRef}
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => e.target.files?.[0] && handleWatermarkSelect(e.target.files[0])}
+                          />
+                        </div>
+                      </TabsContent>
+                    </Tabs>
+
+                    {/* Common Settings */}
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label className="text-foreground">Position</Label>
+                        <Select value={position} onValueChange={setPosition}>
+                          <SelectTrigger className="bg-card/50 border-border text-foreground">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {positions.map((pos) => (
+                              <SelectItem key={pos.value} value={pos.value}>
+                                {pos.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label className="text-foreground">Opacity: {opacity[0]}%</Label>
+                        <Slider
+                          value={opacity}
+                          onValueChange={setOpacity}
+                          max={100}
+                          min={10}
+                          step={5}
+                          className="[&>span:first-child]:bg-white/30 [&_[role=slider]]:bg-cyan-500"
+                        />
+                      </div>
+                    </div>
+
+                    <Button
+                      onClick={applyWatermark}
+                      disabled={isProcessing || !canApplyWatermark}
+                      className="w-full bg-gradient-to-r from-cyan-500 to-blue-500 hover:from-cyan-600 hover:to-blue-600 text-white font-bold"
+                    >
+                      {isProcessing ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2" />
+                          Adding Watermark...
+                        </>
+                      ) : (
+                        <>
+                          <Droplets className="w-4 h-4 mr-2" />
+                          Apply Watermark
+                        </>
+                      )}
+                    </Button>
+
+                    {isProcessing && <Progress value={progress} className="h-2" />}
+
+                    {watermarkedFile && (
+                      <div className="space-y-4">
+                        <div className="relative rounded-lg overflow-hidden">
+                          <img
+                            src={watermarkedPreview || "/placeholder.svg"}
+                            alt="Watermarked"
+                            className="w-full h-48 object-contain bg-black/5"
+                          />
+                          <Badge className="absolute top-2 left-2 bg-green-500/20 text-green-300">Watermarked</Badge>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4 text-sm">
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">New Size:</span>
+                            <span className="text-foreground font-medium">{formatFileSize(watermarkedFile.size)}</span>
+                          </div>
+                          <div className="flex justify-between">
+                            <span className="text-muted-foreground">Watermark:</span>
+                            <span className="text-foreground font-medium">
+                              {watermarkType === "text" ? "Text" : "Image"}
+                            </span>
+                          </div>
+                        </div>
+
+                        <Button
+                          onClick={downloadWatermarked}
+                          className="w-full bg-green-500 hover:bg-green-600 text-white"
+                        >
+                          <Download className="w-4 h-4 mr-2" />
+                          Download Watermarked
+                        </Button>
+                      </div>
+                    )}
+                  </>
+                )}
               </CardContent>
             </Card>
-          </TabsContent>
-        </Tabs>
+          </div>
+
+          {/* How to Use & Features */}
+          <Tabs defaultValue="howto" className="w-full">
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="howto">How to Use</TabsTrigger>
+              <TabsTrigger value="features">Features</TabsTrigger>
+              <TabsTrigger value="tips">Pro Tips</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="howto" className="mt-6">
+              <Card className="bg-card/50 backdrop-blur-lg border-border">
+                <CardHeader>
+                  <CardTitle className="text-foreground flex items-center gap-2">
+                    <Info className="w-5 h-5 text-cyan-400" />
+                    How to Add Watermarks
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="grid gap-4">
+                    {[
+                      {
+                        step: 1,
+                        title: "Upload Your Image",
+                        description: "Drag and drop or click to select the image you want to watermark",
+                      },
+                      {
+                        step: 2,
+                        title: "Choose Watermark Type",
+                        description: "Select between text watermark or upload an image/logo watermark",
+                      },
+                      {
+                        step: 3,
+                        title: "Customize Settings",
+                        description: "Adjust position, opacity, size, and other watermark properties",
+                      },
+                      {
+                        step: 4,
+                        title: "Apply & Download",
+                        description: "Process your watermark and download the protected image",
+                      },
+                    ].map((item) => (
+                      <div key={item.step} className="flex gap-4">
+                        <div className="w-8 h-8 bg-gradient-to-r from-cyan-500 to-blue-500 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                          {item.step}
+                        </div>
+                        <div>
+                          <h3 className="font-semibold text-foreground">{item.title}</h3>
+                          <p className="text-muted-foreground text-sm">{item.description}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="features" className="mt-6">
+              <Card className="bg-card/50 backdrop-blur-lg border-border">
+                <CardHeader>
+                  <CardTitle className="text-foreground">Key Features</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid md:grid-cols-2 gap-4">
+                    {[
+                      {
+                        icon: CheckCircle,
+                        title: "Text & Image Watermarks",
+                        description: "Add custom text or upload logo/image watermarks",
+                      },
+                      {
+                        icon: CheckCircle,
+                        title: "9-Point Positioning",
+                        description: "Place watermarks in any of 9 preset positions",
+                      },
+                      {
+                        icon: CheckCircle,
+                        title: "Opacity Control",
+                        description: "Adjust transparency from 10% to 100%",
+                      },
+                      {
+                        icon: CheckCircle,
+                        title: "Font Customization",
+                        description: "Control text size, color, and styling options",
+                      },
+                    ].map((feature, index) => (
+                      <div key={index} className="flex gap-3">
+                        {feature.icon && <feature.icon className="w-5 h-5 text-green-400 mt-1" />}
+                        <div>
+                          <h3 className="font-semibold text-foreground">{feature.title}</h3>
+                          <p className="text-muted-foreground text-sm">{feature.description}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            <TabsContent value="tips" className="mt-6">
+              <Card className="bg-card/50 backdrop-blur-lg border-border">
+                <CardHeader>
+                  <CardTitle className="text-foreground">Pro Tips</CardTitle>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-3">
+                    <div className="p-3 bg-cyan-500/10 border border-cyan-500/20 rounded-lg">
+                      <h4 className="font-semibold text-foreground mb-1">Subtle Protection</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Use 30-50% opacity for watermarks that protect without being too distracting.
+                      </p>
+                    </div>
+                    <div className="p-3 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+                      <h4 className="font-semibold text-foreground mb-1">Logo Watermarks</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Use PNG logos with transparent backgrounds for the best watermark results.
+                      </p>
+                    </div>
+                    <div className="p-3 bg-teal-500/10 border border-teal-500/20 rounded-lg">
+                      <h4 className="font-semibold text-foreground mb-1">Text Contrast</h4>
+                      <p className="text-sm text-muted-foreground">
+                        Use white text on dark images and dark text on light images for better visibility.
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </Tabs>
+        </main>
+
+        {/* Sidebar - On the Right */}
+        <aside className="lg:w-1/4 lg:shrink-0">
+          <div className="sticky top-24">
+            <ImageToolsSidebar />
+          </div>
+        </aside>
       </div>
     </>
   )
