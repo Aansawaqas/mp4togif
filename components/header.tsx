@@ -97,7 +97,7 @@ export default function Header() {
       category: "PDF Creation",
       tools: [
         { name: "Create PDF", href: "/create-pdf", icon: FilePlus, description: "Create PDFs from images/text" },
-        { name: "Image to PDF", href: "/image-to-pdf", icon: FileImage, description: "Convert images to PDF" },
+        { name: "Image to PDF", href: "/pdf-to-image", icon: FileImage, description: "Convert images to PDF" },
         { name: "Text to PDF", href: "/text-to-pdf", icon: Type, description: "Convert text documents to PDF" },
         { name: "Sign PDF", href: "/sign-pdf", icon: Signature, description: "Add digital signatures" },
       ],
