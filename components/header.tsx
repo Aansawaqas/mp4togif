@@ -86,8 +86,7 @@ export default function Header() {
           href: "/background-remover",
           icon: Layers,
           description: "Remove backgrounds instantly",
-        },
-        { name: "Color Palette", href: "/color-palette", icon: Palette, description: "Extract colors from images" },
+        },        
       ],
     },
   ]
@@ -98,8 +97,7 @@ export default function Header() {
       tools: [
         { name: "Create PDF", href: "/create-pdf", icon: FilePlus, description: "Create PDFs from images/text" },
         { name: "PDF to Image", href: "/pdf-to-image", icon: FileImage, description: "Convert images to PDF" },
-        { name: "Text to PDF", href: "/text-to-pdf", icon: Type, description: "Convert text documents to PDF" },
-        { name: "Sign PDF", href: "/sign-pdf", icon: Signature, description: "Add digital signatures" },
+        { name: "Text to PDF", href: "/text-to-pdf", icon: Type, description: "Convert text documents to PDF" },        
       ],
     },
     {
@@ -107,8 +105,7 @@ export default function Header() {
       tools: [
         { name: "Merge PDFs", href: "/pdf-merger", icon: Merge, description: "Combine multiple PDFs" },
         { name: "Split PDF", href: "/pdf-splitter", icon: Split, description: "Split PDF into pages" },
-        { name: "Compress PDF", href: "/pdf-compressor", icon: Zap, description: "Reduce PDF file size" },
-        { name: "Delete Pages", href: "/delete-pdf-pages", icon: FileX, description: "Remove unwanted pages" },
+        { name: "Compress PDF", href: "/pdf-compressor", icon: Zap, description: "Reduce PDF file size" },        
       ],
     },
   ]
