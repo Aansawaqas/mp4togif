@@ -130,7 +130,7 @@ export default function Header() {
             <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
               <Film className="w-5 h-5 text-white" />
             </div>
-            <span className="font-bold text-lg hidden sm:block">GIF Converter</span>
+            <span className="font-bold text-lg hidden sm:block">Mp4 to GIF</span>
           </Link>
 
           {/* Desktop Navigation */}
