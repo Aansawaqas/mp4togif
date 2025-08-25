@@ -633,7 +633,7 @@ export default function ImageResizer(): ReactElement {
 
         {/* Sidebar - Right Side */}
         <aside className="lg:w-1/4 lg:shrink-0">
-          <div className="sticky top-24">
+          <div className="sticky top-32">
             <ImageToolsSidebar />
           </div>
         </aside>
