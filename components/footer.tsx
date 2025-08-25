@@ -20,7 +20,7 @@ export default function Footer() {
     social: [
       { name: "GitHub", href: "#", icon: Github, color: "text-gray-400" },
       { name: "Twitter", href: "#", icon: Twitter, color: "text-blue-400" },
-      { name: "Email", href: "mailto:contact@mp4togif.com", icon: Mail, color: "text-green-400" },
+      { name: "Email", href: "mailto:contact@makegifs.online", icon: Mail, color: "text-green-400" },
     ],
   }
 
