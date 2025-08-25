@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://mp4togif.com/sitemap.xml
+Sitemap: https://makegifs.online/sitemap.xml
