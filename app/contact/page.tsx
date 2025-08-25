@@ -18,7 +18,7 @@ export default function Contact() {
       icon: Mail,
       title: "Email Us",
       description: "Get in touch via email",
-      value: "contact@mp4togif.com",
+      value: "contact@makegifs.online",
       color: "text-blue-400",
     },
     {
