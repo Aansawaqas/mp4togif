@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+import Image from "next/image" // Added Image import
 import { Film, Heart, Github, Twitter, Mail } from "lucide-react"
 
 export default function Footer() {
@@ -30,9 +31,14 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Logo & Description */}
           <div className="md:col-span-2">
-            <Link href="/logo.png" className="flex items-center gap-2 text-foreground mb-4">
-              <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-                <Film className="w-5 h-5 text-foreground" />
+            <Link href="/" className="flex items-center gap-2 text-foreground mb-4">
+              <div className="w-8 h-8 relative"> {/* Changed to relative positioning for Image component */}
+                <Image
+                  src="/logo.png"
+                  alt="MP4 to GIF Logo"
+                  fill
+                  className="rounded-full object-contain"
+                />
               </div>
               <span className="font-bold text-xl">MP4 to GIF</span>
             </Link>
