@@ -123,7 +123,7 @@ export default function Header() {
       <nav className="bg-card/80 dark:bg-card/80 backdrop-blur-lg rounded-full border border-border px-6 py-3 relative">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 text-foreground hover:text-primary transition-colors">
+          <Link href="/logo.png" className="flex items-center gap-2 text-foreground hover:text-primary transition-colors">
             <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
               <Film className="w-5 h-5 text-white" />
             </div>
