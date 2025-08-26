@@ -2,6 +2,7 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import Image from "next/image" // Added Image import
 import { usePathname } from "next/navigation"
 import {
   Film,
@@ -122,10 +123,15 @@ export default function Header() {
     <header className="fixed top-4 left-1/2 transform -translate-x-1/2 z-50 w-full max-w-6xl px-4">
       <nav className="bg-card/80 dark:bg-card/80 backdrop-blur-lg rounded-full border border-border px-6 py-3 relative">
         <div className="flex items-center justify-between">
-          {/* Logo */}
-          <Link href="/logo.png" className="flex items-center gap-2 text-foreground hover:text-primary transition-colors">
-            <div className="w-8 h-8 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center">
-              <Film className="w-5 h-5 text-white" />
+          {/* Logo - Fixed */}
+          <Link href="/" className="flex items-center gap-2 text-foreground hover:text-primary transition-colors">
+            <div className="w-8 h-8 relative"> {/* Changed to relative positioning for Image component */}
+              <Image
+                src="/logo.png"
+                alt="Mp4 to GIF Logo"
+                fill
+                className="rounded-full object-contain"
+              />
             </div>
             <span className="font-bold text-lg hidden sm:block">Mp4 to GIF</span>
           </Link>
