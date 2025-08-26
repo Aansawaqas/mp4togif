@@ -85,7 +85,7 @@ export default function Footer() {
 
         {/* Bottom Bar */}
         <div className="border-t border-border mt-8 pt-8 flex flex-col md:flex-row items-center justify-between">
-          <p className="text-muted-foreground/80 text-sm">© {currentYear} GIF Converter. All rights reserved.</p>
+          <p className="text-muted-foreground/80 text-sm">© {currentYear} Mp4 to Gif Online. All rights reserved.</p>
           <p className="text-muted-foreground/80 text-sm flex items-center gap-1 mt-2 md:mt-0">
             Made with <Heart className="w-4 h-4 text-red-400" /> for creators worldwide
           </p>
